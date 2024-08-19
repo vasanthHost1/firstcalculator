@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+
+    <div class="div1">
+      <h3 id="h3">Black shirt</h3>
+      <p id="p">price:1000</p>
+
+      <button class="buybtn" data-name="black shirt" data-price="1000">Buy</button>
+    </div>
+
+    <div class="div2">
+      <h3>blue shirt</h3>
+      <p>price:900</p>
+      <button class="buybtn" data-name="blue shirt" data-price="900">Buy</button>
+    </div>
+
+
+    <form method="post" action="https://script.google.com/macros/s/AKfycbyCgao40W9JLe8KAGLEaPKgs2dAVLMhVvb_k1FdDvnkfs5YDsXnz_PesWLUuXMFMgqUUg/exec">
+
+        
+      <label for="name">Name:</label>
+      <input type="text" name="name" id="name" readonly><br><br>
+
+      <label for="email">Email:</label>
+      <input type="email" name="email" id="email" readonly ><br><br>
+
+      <label for="phone">Phone:</label>
+      <input type="tel" name="phone" id="phone" readonly><br><br>
+
+    
+
+      <input type="submit" value="Submit" class="buyButton">
+    </form>
+
+    <script>
+      // Add event listeners to all buy buttons
+      
+      var l=document.querySelectorAll(".buyButton")
+      var buybttn=document.querySelectorAll(".buybtn")
+
+      buybttn.forEach(function(l) {
+      l.addEventListener('click', function() {
+              // Get the product details from data attributes
+              var name = this.getAttribute('data-name');
+              var price = this.getAttribute('data-price');
+
+              // Auto-fill the form with product details
+              document.getElementById('name').value = name;
+              document.getElementById('email').value = price;
+              document.getElementById('phone').value= name;
+            
+          });
+      });
+  </script>
+  </body>
+</html>
