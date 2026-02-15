@@ -47,29 +47,30 @@
 <script>
 const inventory = document.getElementById("inventory");
 
-fetch("https://unpkg.com/minecraft-data@latest/data/pc/latest/items.json")
+fetch("https://unpkg.com/minecraft-data@3.64.0/data/pc/1.20.4/items.json")
   .then(res => res.json())
   .then(items => {
-    items.forEach(item => {
+    console.log("Loaded:", items.length);
 
+    items.forEach(item => {
       const slot = document.createElement("div");
       slot.className = "slot";
 
       const img = document.createElement("img");
 
-      img.src = `https://assets.mcasset.cloud/1.20/assets/minecraft/textures/item/${item.name}.png`;
+      img.src = `https://assets.mcasset.cloud/1.20.4/assets/minecraft/textures/item/${item.name}.png`;
 
       img.onerror = () => {
         img.onerror = null;
-        img.src = `https://assets.mcasset.cloud/1.20/assets/minecraft/textures/block/${item.name}.png`;
+        img.src = `https://assets.mcasset.cloud/1.20.4/assets/minecraft/textures/block/${item.name}.png`;
       };
 
       slot.appendChild(img);
       inventory.appendChild(slot);
     });
   })
-  .catch(err => console.log("Error loading items:", err));
+  .catch(err => console.log("Fetch Error:", err));
 </script>
-
 </body>
 </html>
+
