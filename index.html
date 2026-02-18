@@ -130,7 +130,7 @@ body{
   <ul id="playlist"></ul>
 </div>
 
-<div id="player" style="margin-top:20px;"></div>
+<div id="player" style="position:absolute; left:-9999px;"></div>
 
 <script>
 
@@ -152,20 +152,23 @@ let player;
 let duration=0;
 let isPlaying=false;
 let interval;
+
 let playlistSongs=JSON.parse(localStorage.getItem('playlistSongs')||'[]');
 let currentSongIndex=0;
-let recentlyPlayed=[];
 
-function updateProgress(){
-  if(player && player.getCurrentTime){
-    const current=player.getCurrentTime();
-    duration=player.getDuration();
-    document.getElementById('progressBar').value=(current/duration)*100||0;
-  }
-}
+let recentlyPlayed=[];
+let lastMainKeyword="";
+
+// ================= PLAYER =================
 
 function onYouTubeIframeAPIReady(){
   player=new YT.Player('player',{
+    playerVars:{
+      autoplay:1,
+      controls:0,
+      modestbranding:1,
+      rel:0
+    },
     events:{
       onReady:()=>{
         interval=setInterval(updateProgress,1000);
@@ -175,26 +178,36 @@ function onYouTubeIframeAPIReady(){
   });
 }
 
+function updateProgress(){
+  if(player && player.getCurrentTime){
+    const current=player.getCurrentTime();
+    duration=player.getDuration();
+    document.getElementById('progressBar').value=(current/duration)*100||0;
+  }
+}
+
 function onPlayerStateChange(e){
   if(e.data===YT.PlayerState.ENDED){
+
     if(currentSongIndex < playlistSongs.length-1){
       currentSongIndex++;
       playSongAt(currentSongIndex);
-    }else{
-      autoplaySimilarSong();
+    } else {
+      smartRadioNext();
     }
   }
 }
 
+// ================= BASIC CONTROLS =================
+
 function togglePlay(){
   if(!player) return;
-  if(isPlaying){
-    player.pauseVideo();
-  }else{
-    player.playVideo();
-  }
+  if(isPlaying) player.pauseVideo();
+  else player.playVideo();
   isPlaying=!isPlaying;
 }
+
+// ================= SEARCH =================
 
 function searchSong(query,save=false){
   query=query||document.getElementById('searchInput').value.trim();
@@ -206,6 +219,7 @@ function searchSong(query,save=false){
     if(!data.items.length) return;
     const video=data.items[0];
     playVideo(video.id.videoId,video.snippet.title,video.snippet.thumbnails.medium.url);
+
     if(save){
       playlistSongs.push({
         id:video.id.videoId,
@@ -225,21 +239,39 @@ function playVideo(id,title,thumb){
   isPlaying=true;
 
   recentlyPlayed.push(id);
-  if(recentlyPlayed.length>5) recentlyPlayed.shift();
+  if(recentlyPlayed.length>6) recentlyPlayed.shift();
+
+  lastMainKeyword = title.toLowerCase().split(" ").slice(0,2).join(" ");
 }
 
-function autoplaySimilarSong(){
-  const currentTitle=document.getElementById('videoTitle').innerText;
-  const cleanQuery=currentTitle.replace(/official|video|lyrics|hd|4k/gi,'').trim()+" audio";
+// ================= SMART RADIO =================
 
-  fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(cleanQuery)}&key=${getApiKey()}&type=video&videoEmbeddable=true&maxResults=5`)
+function smartRadioNext(){
+
+  fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=popular music 2025&key=${getApiKey()}&type=video&videoEmbeddable=true&maxResults=12`)
   .then(res=>res.json())
   .then(data=>{
-    const next=data.items.find(v=>!recentlyPlayed.includes(v.id.videoId));
+    if(!data.items) return;
+
+    const next=data.items.find(item=>{
+      const title=item.snippet.title.toLowerCase();
+      return (
+        !recentlyPlayed.includes(item.id.videoId) &&
+        !title.includes(lastMainKeyword)
+      );
+    });
+
     if(!next) return;
-    playVideo(next.id.videoId,next.snippet.title,next.snippet.thumbnails.medium.url);
+
+    playVideo(
+      next.id.videoId,
+      next.snippet.title,
+      next.snippet.thumbnails.medium.url
+    );
   });
 }
+
+// ================= PLAYLIST =================
 
 function togglePlaylistPanel(){
   const panel=document.getElementById('playlistPanel');
@@ -296,4 +328,3 @@ document.body.appendChild(tag);
 
 </body>
 </html>
-
