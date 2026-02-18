@@ -6,109 +6,101 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-body {
-  background: #121212;
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+body{
+  background:#121212;
+  font-family:'Poppins',sans-serif;
+  margin:0;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
-
-.search-bar {
-  display: flex;
-  width: 90%;
-  max-width: 400px;
-  margin: 20px auto;
-  border-radius: 25px;
-  overflow: hidden;
-  background: #282828;
+.search-bar{
+  display:flex;
+  width:90%;
+  max-width:400px;
+  margin:20px auto;
+  border-radius:25px;
+  overflow:hidden;
+  background:#282828;
 }
-
-.search-bar input {
-  flex: 1;
-  border: none;
-  padding: 12px;
-  background: transparent;
-  color: white;
-  outline: none;
+.search-bar input{
+  flex:1;
+  border:none;
+  padding:12px;
+  background:transparent;
+  color:white;
+  outline:none;
 }
-
-.search-bar button {
-  background: #1db954;
-  border: none;
-  padding: 0 15px;
-  color: white;
-  cursor: pointer;
+.search-bar button{
+  background:#1db954;
+  border:none;
+  padding:0 15px;
+  color:white;
+  cursor:pointer;
 }
-
-.album-art {
-  width: 250px;
-  height: 250px;
-  border-radius: 10px;
-  margin-top: 20px;
-  background: #333 center/cover no-repeat;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+.album-art{
+  width:250px;
+  height:250px;
+  border-radius:10px;
+  margin-top:20px;
+  background:#333 center/cover no-repeat;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
-
-.song-title {
-  margin-top: 20px;
-  font-weight: 600;
+.song-title{
+  margin-top:20px;
+  font-weight:600;
+  text-align:center;
 }
-
-.controls {
-  margin-top: 25px;
+.controls{
+  margin-top:25px;
 }
-
-button {
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  border: none;
-  background: #1db954;
-  color: white;
-  cursor: pointer;
+.controls button{
+  border-radius:50%;
+  width:60px;
+  height:60px;
+  border:none;
+  background:#1db954;
+  color:white;
+  cursor:pointer;
+  font-size:20px;
 }
-
-.progress-container {
-  width: 80%;
-  margin-top: 20px;
+.progress-container{
+  width:80%;
+  margin-top:20px;
 }
-
-#progressBar {
-  width: 100%;
+#progressBar{
+  width:100%;
 }
-
-#playlistPanel {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 260px;
-  background: #181818;
-  padding: 10px;
-  border-radius: 10px;
-  display: none;
-  max-height: 50vh;
-  overflow-y: auto;
+#playlistPanel{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  width:260px;
+  background:#181818;
+  padding:10px;
+  border-radius:10px;
+  display:none;
+  max-height:50vh;
+  overflow-y:auto;
 }
-
-#playlistPanel ul {
-  list-style: none;
-  padding: 0;
+#playlistPanel ul{
+  list-style:none;
+  padding:0;
 }
-
-#playlistPanel li {
-  padding: 6px;
-  cursor: pointer;
+#playlistPanel li{
+  padding:6px;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-.delete-btn {
-  background: red;
-  border: none;
-  color: white;
-  margin-left: 10px;
-  cursor: pointer;
+.delete-btn{
+  background:red;
+  border:none;
+  color:white;
+  cursor:pointer;
+  padding:3px 6px;
 }
 </style>
 </head>
@@ -142,56 +134,53 @@ button {
 
 <script>
 
-let player;
-let duration = 0;
-let isPlaying = false;
-let interval;
+// ===== API KEYS =====
+const apiKeys=[
+"AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
+"AIzaSyCkUWUbVYjZDNRhNJBJ-NkN8ta3ga4vY3Y",
+"AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48"
+];
 
-const  apiKeys=["AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k","AIzaSyCkUWUbVYjZDNRhNJBJ-NkN8ta3ga4vY3Y","AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48
-
-let currentKeyIndex = 0;
-let playlistSongs = JSON.parse(localStorage.getItem('playlistSongs') || '[]');
-let currentSongIndex = 0;
-let recentlyPlayed = [];
-
+let currentKeyIndex=0;
 function getApiKey(){
-  const key = apiKeys[currentKeyIndex];
-  currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+  const key=apiKeys[currentKeyIndex];
+  currentKeyIndex=(currentKeyIndex+1)%apiKeys.length;
   return key;
 }
 
-function formatTime(sec){
-  const m = Math.floor(sec/60);
-  const s = Math.floor(sec%60);
-  return `${m}:${s.toString().padStart(2,'0')}`;
-}
+let player;
+let duration=0;
+let isPlaying=false;
+let interval;
+let playlistSongs=JSON.parse(localStorage.getItem('playlistSongs')||'[]');
+let currentSongIndex=0;
+let recentlyPlayed=[];
 
 function updateProgress(){
   if(player && player.getCurrentTime){
-    const current = player.getCurrentTime();
-    duration = player.getDuration();
-    document.getElementById('progressBar').value = (current/duration)*100 || 0;
+    const current=player.getCurrentTime();
+    duration=player.getDuration();
+    document.getElementById('progressBar').value=(current/duration)*100||0;
   }
 }
 
 function onYouTubeIframeAPIReady(){
-  player = new YT.Player('player',{
+  player=new YT.Player('player',{
     events:{
-      onReady: () => {
-        interval = setInterval(updateProgress,1000);
+      onReady:()=>{
+        interval=setInterval(updateProgress,1000);
       },
-      onStateChange: onPlayerStateChange
+      onStateChange:onPlayerStateChange
     }
   });
 }
 
 function onPlayerStateChange(e){
-  if(e.data === YT.PlayerState.ENDED){
-
-    if(currentSongIndex < playlistSongs.length - 1){
+  if(e.data===YT.PlayerState.ENDED){
+    if(currentSongIndex < playlistSongs.length-1){
       currentSongIndex++;
       playSongAt(currentSongIndex);
-    } else {
+    }else{
       autoplaySimilarSong();
     }
   }
@@ -201,29 +190,27 @@ function togglePlay(){
   if(!player) return;
   if(isPlaying){
     player.pauseVideo();
-  } else {
+  }else{
     player.playVideo();
   }
-  isPlaying = !isPlaying;
+  isPlaying=!isPlaying;
 }
 
-function searchSong(query, save=false){
-  query = query || document.getElementById('searchInput').value.trim();
+function searchSong(query,save=false){
+  query=query||document.getElementById('searchInput').value.trim();
   if(!query) return;
 
   fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${getApiKey()}&type=video&videoEmbeddable=true&maxResults=1`)
   .then(res=>res.json())
   .then(data=>{
     if(!data.items.length) return;
-    const video = data.items[0];
-
-    playVideo(video.id.videoId, video.snippet.title, video.snippet.thumbnails.medium.url);
-
+    const video=data.items[0];
+    playVideo(video.id.videoId,video.snippet.title,video.snippet.thumbnails.medium.url);
     if(save){
       playlistSongs.push({
-        id: video.id.videoId,
-        name: video.snippet.title,
-        thumb: video.snippet.thumbnails.default.url
+        id:video.id.videoId,
+        name:video.snippet.title,
+        thumb:video.snippet.thumbnails.default.url
       });
       savePlaylist();
       updatePlaylistUI();
@@ -231,57 +218,62 @@ function searchSong(query, save=false){
   });
 }
 
-function playVideo(id, title, thumb){
+function playVideo(id,title,thumb){
   player.loadVideoById(id);
-  document.getElementById('videoTitle').innerText = title;
-  document.getElementById('thumbnail').style.backgroundImage = `url(${thumb})`;
-  isPlaying = true;
+  document.getElementById('videoTitle').innerText=title;
+  document.getElementById('thumbnail').style.backgroundImage=`url(${thumb})`;
+  isPlaying=true;
 
   recentlyPlayed.push(id);
-  if(recentlyPlayed.length > 5) recentlyPlayed.shift();
+  if(recentlyPlayed.length>5) recentlyPlayed.shift();
 }
 
 function autoplaySimilarSong(){
-  const currentTitle = document.getElementById('videoTitle').innerText;
-  const cleanQuery = currentTitle.replace(/official|video|lyrics|hd|4k/gi,'').trim() + " audio";
+  const currentTitle=document.getElementById('videoTitle').innerText;
+  const cleanQuery=currentTitle.replace(/official|video|lyrics|hd|4k/gi,'').trim()+" audio";
 
   fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(cleanQuery)}&key=${getApiKey()}&type=video&videoEmbeddable=true&maxResults=5`)
   .then(res=>res.json())
   .then(data=>{
-    const next = data.items.find(v => !recentlyPlayed.includes(v.id.videoId));
+    const next=data.items.find(v=>!recentlyPlayed.includes(v.id.videoId));
     if(!next) return;
-    playVideo(next.id.videoId, next.snippet.title, next.snippet.thumbnails.medium.url);
+    playVideo(next.id.videoId,next.snippet.title,next.snippet.thumbnails.medium.url);
   });
 }
 
 function togglePlaylistPanel(){
-  const panel = document.getElementById('playlistPanel');
-  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  const panel=document.getElementById('playlistPanel');
+  panel.style.display=panel.style.display==='block'?'none':'block';
 }
 
 function addPlaylistInputSong(){
-  const name = document.getElementById('playlistInput').value.trim();
+  const name=document.getElementById('playlistInput').value.trim();
   if(!name) return;
   searchSong(name,true);
   document.getElementById('playlistInput').value='';
 }
 
 function savePlaylist(){
-  localStorage.setItem('playlistSongs', JSON.stringify(playlistSongs));
+  localStorage.setItem('playlistSongs',JSON.stringify(playlistSongs));
 }
 
 function updatePlaylistUI(){
-  const ul = document.getElementById('playlist');
+  const ul=document.getElementById('playlist');
   ul.innerHTML='';
   playlistSongs.forEach((song,idx)=>{
-    const li = document.createElement('li');
-    li.textContent = song.name;
-    li.onclick = ()=>{ currentSongIndex=idx; playSongAt(idx); };
+    const li=document.createElement('li');
+    li.textContent=song.name;
+    li.onclick=()=>{currentSongIndex=idx;playSongAt(idx);};
 
-    const del = document.createElement('button');
+    const del=document.createElement('button');
     del.textContent="X";
     del.className="delete-btn";
-    del.onclick=(e)=>{ e.stopPropagation(); playlistSongs.splice(idx,1); savePlaylist(); updatePlaylistUI(); };
+    del.onclick=(e)=>{
+      e.stopPropagation();
+      playlistSongs.splice(idx,1);
+      savePlaylist();
+      updatePlaylistUI();
+    };
 
     li.appendChild(del);
     ul.appendChild(li);
@@ -289,9 +281,9 @@ function updatePlaylistUI(){
 }
 
 function playSongAt(idx){
-  const song = playlistSongs[idx];
+  const song=playlistSongs[idx];
   if(!song) return;
-  playVideo(song.id, song.name, song.thumb);
+  playVideo(song.id,song.name,song.thumb);
 }
 
 updatePlaylistUI();
@@ -304,5 +296,3 @@ document.body.appendChild(tag);
 
 </body>
 </html>
-
-
